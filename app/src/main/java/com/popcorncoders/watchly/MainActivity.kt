@@ -13,18 +13,33 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.padding
 import com.popcorncoders.watchly.ui.theme.WatchlyTheme
 import com.popcorncoders.watchly.viewmodel.MovieListViewModel
 
+// Main entry point of the app
 class MainActivity : ComponentActivity() {
+
+    // Creates an instance of the ViewModel
+    // Holds and manages UI-related data
     private val movieListViewModel: MovieListViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Jetpack Compose UI starts
         setContent {
+            // Applies the app's theme
             WatchlyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) {
-                    MovieListScreen(viewModel = movieListViewModel)
+                // This provides basic layout structure & handles things like padding for system UI
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    // Calls MovieList screen and passes:
+                    // 1. ViewModel (data source)
+                    // 2. Padding so content doesn't overlap system UI
+                    MovieListScreen(
+                        viewModel = movieListViewModel,
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -32,14 +47,21 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MovieListScreen(viewModel: MovieListViewModel) {
-    // Observe the movies LiveData
+fun MovieListScreen(
+    viewModel: MovieListViewModel,
+    modifier: Modifier = Modifier
+) {
+    // Observe the LiveData from ViewModel
+    // When data changes, UI auto updates
     val movies = viewModel.movies.observeAsState(emptyList())
 
+    // Scrollable list
     LazyColumn {
+        // Loop through each movie in the list
         items(movies.value) { movie ->
+            // Display each movie title as text
             Text(
-                text = movie.title,
+                text = movie.title, // Comes from API
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.fillMaxSize()
             )
