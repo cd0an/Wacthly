@@ -1,47 +1,33 @@
 package com.popcorncoders.watchly
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.popcorncoders.watchly.ui.theme.WatchlyTheme
+import androidx.lifecycle.lifecycleScope
+import com.popcorncoders.watchly.data.remote.RetrofitClient
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    private val tag = "APITest"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            WatchlyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+
+        val apiKey = "8722193d9837f70bd611fb987c977f33"
+
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.api.getPopularMovies(apiKey)
+                Log.d(tag, "Number of movies received: ${response.results.size}")
+                response.results.forEach { movie ->
+                    Log.d(tag, "Movie: ${movie.title}")
                 }
+            }
+            catch (e: Exception) {
+                Log.e(tag, "API call failed", e)
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WatchlyTheme {
-        Greeting("Android")
-    }
-}
