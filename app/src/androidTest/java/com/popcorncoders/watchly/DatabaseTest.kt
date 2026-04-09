@@ -7,10 +7,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.popcorncoders.watchly.data.local.AppDatabase
 import com.popcorncoders.watchly.data.local.dao.FavoriteDao
 import com.popcorncoders.watchly.data.local.dao.MovieDao
-import com.popcorncoders.watchly.data.local.dao.WatchlistDao
 import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
 import com.popcorncoders.watchly.data.local.entity.MovieEntity
-import com.popcorncoders.watchly.data.local.entity.WatchlistEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -25,7 +23,6 @@ class DatabaseTest {
 
     private lateinit var movieDao: MovieDao
     private lateinit var favoriteDao: FavoriteDao
-    private lateinit var watchlistDao: WatchlistDao
     private lateinit var db: AppDatabase
 
     @Before
@@ -36,7 +33,6 @@ class DatabaseTest {
             .build()
         movieDao = db.movieDao()
         favoriteDao = db.favoriteDao()
-        watchlistDao = db.watchlistDao()
     }
 
     @After
@@ -128,59 +124,6 @@ class DatabaseTest {
 
         assertNotNull(found)
         assertEquals("Pulp Fiction", found?.title)
-        assertNull(notFound)
-    }
-
-    @Test
-    fun insertAndReadWatchlist() = runBlocking {
-        val watchlistItem = WatchlistEntity(
-            movieId = 155,
-            title = "The Dark Knight",
-            overview = "Batman raises the stakes in his war on crime.",
-            posterPath = "/qJ2tW6WMUDux911BTUgMe1ST0.jpg"
-        )
-
-        watchlistDao.addToWatchlist(watchlistItem)
-
-        val allItems = watchlistDao.getAllWatchlistItems().first()
-
-        assertEquals(1, allItems.size)
-        assertEquals("The Dark Knight", allItems[0].title)
-        assertEquals(155, allItems[0].movieId)
-    }
-
-    @Test
-    fun removeFromWatchlist() = runBlocking {
-        val watchlistItem = WatchlistEntity(
-            movieId = 155,
-            title = "The Dark Knight",
-            overview = "Batman raises the stakes in his war on crime.",
-            posterPath = "/qJ2tW6WMUDux911BTUgMe1ST0.jpg"
-        )
-
-        watchlistDao.addToWatchlist(watchlistItem)
-        watchlistDao.removeFromWatchlist(155)
-
-        val allItems = watchlistDao.getAllWatchlistItems().first()
-        assertTrue(allItems.isEmpty())
-    }
-
-    @Test
-    fun lookupWatchlistItemByMovieId() = runBlocking {
-        val watchlistItem = WatchlistEntity(
-            movieId = 550,
-            title = "Fight Club",
-            overview = "An insomniac office worker and a devil-may-care soap maker form an underground fight club.",
-            posterPath = "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
-        )
-
-        watchlistDao.addToWatchlist(watchlistItem)
-
-        val found = watchlistDao.getWatchlistItemByMovieId(550)
-        val notFound = watchlistDao.getWatchlistItemByMovieId(999)
-
-        assertNotNull(found)
-        assertEquals("Fight Club", found?.title)
         assertNull(notFound)
     }
 
