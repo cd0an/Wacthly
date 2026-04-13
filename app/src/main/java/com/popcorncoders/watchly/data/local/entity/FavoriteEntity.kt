@@ -10,5 +10,6 @@ data class FavoriteEntity(
     val title: String,
     val overview: String,
     val posterPath: String,
+    val rating: Int = 0,
     val addedAt: Long = System.currentTimeMillis()
 )

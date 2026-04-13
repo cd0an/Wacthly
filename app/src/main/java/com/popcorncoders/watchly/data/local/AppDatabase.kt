@@ -11,7 +11,7 @@ import com.popcorncoders.watchly.data.local.entity.MovieEntity
 
 @Database(
     entities = [MovieEntity::class, FavoriteEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -29,7 +29,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "watchly_database"
-                ).build()
+                )
+                    //Deletes old database and recreates it when schema changes
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

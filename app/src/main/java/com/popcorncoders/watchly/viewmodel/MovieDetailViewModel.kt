@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.popcorncoders.watchly.data.local.AppDatabase
 import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
+import com.popcorncoders.watchly.model.Movie
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -22,24 +23,48 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
     // Public read-only version of _isFavorite
     val isFavorite: StateFlow<Boolean> = _isFavorite
 
-    // Check if a movie is in the favorites list by ID
-    fun checkIfFavorite(movieId: Int) {
+    // private rating state
+    private val _rating = MutableStateFlow(0)
+
+    // Public read-only version of rating
+    val rating: StateFlow<Int> = _rating
+
+
+    fun loadFavorite(movieId: Int) {
+        // Start a coroutine tied to the ViewModel lifecycle
         viewModelScope.launch {
-            _isFavorite.value = dao.getFavoriteByMovieId(movieId) != null
+
+            // Query the database to find if this movie is already saved in favorites
+            val favorite = dao.getFavoriteByMovieId(movieId)
+
+            // If the movie exists in favorites, set isFavorite = true
+            _isFavorite.value = favorite !=null
+
+            // If the movie is found in the database
+            if (favorite !=null) {
+                _rating.value = favorite.rating
+            } else {
+                _rating.value = 0
+            }
         }
     }
 
-    // Add or remove a movie from favorites
-    fun toggleFavorite(movie: FavoriteEntity) {
-        viewModelScope.launch {         // Launch a coroutine to to database work
-            val existing = dao.getFavoriteByMovieId(movie.movieId)
-            if (existing == null) {
-                dao.addFavorite(movie)  // Add movie to database
-                _isFavorite.value = true         // Update state to show it is now a favorite
-            } else {
-                dao.removeFavorite(movie.movieId)   // Remove movie from database
-                _isFavorite.value = false           // Update state to show it's not a favorite
-            }
+    fun updateRating(value: Int, movie: Movie) {
+        viewModelScope.launch {
+
+            val newFavorite = FavoriteEntity(
+                movieId = movie.id,
+                title = movie.title,
+                overview = movie.overview,
+                posterPath = movie.poster_path,
+                rating = value
+            )
+
+            dao.addFavorite(newFavorite)
+
+            _rating.value = value
+            _isFavorite.value = true
         }
+
     }
 }
