@@ -1,47 +1,49 @@
 package com.popcorncoders.watchly.viewmodel
 
+import android.app.Application
 import android.util.Log
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import com.popcorncoders.watchly.data.local.AppDatabase
+import com.popcorncoders.watchly.data.local.entity.MovieEntity
+import com.popcorncoders.watchly.repository.MovieRepository
 import com.popcorncoders.watchly.data.remote.RetrofitClient
-import com.popcorncoders.watchly.model.Movie
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
-class MovieListViewModel : ViewModel() {
-    // LiveData for the list of movies
-    private val _movies = MutableLiveData<List<Movie>>()
-    val movies: LiveData<List<Movie>> = _movies
+class MovieListViewModel(application: Application) : AndroidViewModel(application) {
+    private val repository = MovieRepository(
+        apiService = RetrofitClient.api,
+        movieDao = AppDatabase.getDatabase(application).movieDao()
+    )
 
-    // LiveData for errors
-    private val _error = MutableLiveData<String>()
-    val error: LiveData<String> = _error
+    // StateFlow for the list of movies
+    private val _movies = MutableStateFlow<List<MovieEntity>>(emptyList())
+    val movies: StateFlow<List<MovieEntity>> = _movies
 
-    // TMDb API Key
-    private val apiKey = "8722193d9837f70bd611fb987c977f33"
+    // StateFlow for errors
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
 
     init {
-        fetchPopularMovies()
+        fetchMovies()
     }
 
-    private fun fetchPopularMovies() {
+    private fun fetchMovies() {
         viewModelScope.launch {
             try {
-                // Make the API call using Retrofit
-                val response = RetrofitClient.api.getPopularMovies(apiKey)
-                _movies.value = response.results
-
-                // Log for testing
-                Log.d("MoviesListViewModel", "Number of movies received: ${response.results.size}")
-                response.results.forEach { movie ->
-                    Log.d("MovieListViewModel", "Movie: ${movie.title}")
-                }
-            }
-            catch (e: Exception) {
+                // Fetch from API and save to Room
+                repository.fetchAndCacheMovies()
+            } catch (e: Exception) {
                 _error.value = e.message
                 Log.e("MovieListViewModel", "Error fetching movies", e)
+            }
+            // Always observe from local DB
+            repository.getMoviesFromDb().collect { cachedMovies ->
+                _movies.value = cachedMovies
+                Log.d("MovieListViewModel", "Movies from DB: ${cachedMovies.size}")
             }
         }
     }

@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,9 +35,19 @@ class MainActivity : ComponentActivity() {
             WatchlyTheme {
                 val navController = rememberNavController()
 
-                val movies by movieListViewModel.movies.observeAsState(emptyList())
-                val error by movieListViewModel.error.observeAsState()
+                val movies by movieListViewModel.movies.collectAsStateWithLifecycle(emptyList())
+                val error by movieListViewModel.error.collectAsStateWithLifecycle()
                 val favorites by favoriteViewModel.favorites.collectAsState()
+
+                // Map MovieEntity -> Movie before passing to UI
+                val mappedMovies = movies.map { entity ->
+                    Movie(
+                        id = entity.id,
+                        title = entity.title,
+                        overview = entity.overview,
+                        poster_path = entity.posterPath
+                    )
+                }
 
                 NavHost(
                     navController = navController,
@@ -45,7 +55,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     composable("movie_list") {
                         MovieListScreen(
-                            movies = movies,
+                            movies = mappedMovies,
                             errorMessage = error,
                             onMovieClick = { movie ->
                                 navController.navigate("movie_detail/${movie.id}")
@@ -63,7 +73,7 @@ class MainActivity : ComponentActivity() {
                         )
                     ) { backStackEntry ->
                         val movieId = backStackEntry.arguments?.getInt("movieId") ?: -1
-                        val selectedMovie: Movie? = movies.find { it.id == movieId }
+                        val selectedMovie: Movie? = mappedMovies.find { it.id == movieId }
                         val movieDetailViewModel: MovieDetailViewModel = viewModel(backStackEntry)
 
                         MovieDetailScreen(
