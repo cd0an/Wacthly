@@ -8,16 +8,56 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.StarBorder
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
     favorites: List<FavoriteEntity>,
+    isDarkMode: Boolean,
+    onToggleDarkMode: () -> Unit,
+    onRatedMoviesPageClick: () -> Unit,
     onRemoveClick: (Int) -> Unit,
     onBackClick: () -> Unit
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text("Favorites") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onToggleDarkMode) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
+                            contentDescription = "Toggle dark mode"
+                        )
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rated movies"
+                        )
+                    }
+
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorites"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -25,22 +65,13 @@ fun FavoritesScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-            Text(
-                "Favorites",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             if (favorites.isEmpty()) {
-                Text("No favorites yet.")
+                Text("No favorite movies yet.")
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     contentPadding = PaddingValues(bottom = 16.dp)
-
                 ) {
                     items(favorites) { movie ->
                         Card(
@@ -51,24 +82,6 @@ fun FavoritesScreen(
                                     movie.title,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                                Row {
-                                    for (i in 1..5) {
-                                        Icon(
-                                            imageVector = if (i <= movie.rating)
-                                                Icons.Filled.Star
-                                            else
-                                                Icons.Outlined.StarBorder,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(20.dp)
-
-                                        )
-                                    }
-
-                                    Spacer(modifier = Modifier.width(8.dp))
-
-                                    Text("${movie.rating}/5")
-                                }
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -77,19 +90,12 @@ fun FavoritesScreen(
                                         onRemoveClick(movie.movieId)
                                     }
                                 ) {
-                                    Text("Remove")
+                                    Text("Remove from Favorites")
                                 }
                             }
                         }
-
                     }
                 }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(onClick = onBackClick) {
-                Text("Back")
             }
         }
     }

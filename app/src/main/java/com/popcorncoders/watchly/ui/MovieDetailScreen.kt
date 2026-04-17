@@ -1,32 +1,90 @@
 package com.popcorncoders.watchly.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.clickable
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
     movie: Movie?,
     viewModel: MovieDetailViewModel,
+    isDarkMode: Boolean,
+    onToggleDarkMode: () -> Unit,
+    onFavoritesPageClick: () -> Unit,
+    onRatedMoviesPageClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = { Text(movie?.title ?: "Movie Details") },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onToggleDarkMode) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
+                            contentDescription = "Toggle dark mode"
+                        )
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rated movies"
+                        )
+                    }
+
+                    IconButton(onClick = onFavoritesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorites page"
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
         if (movie == null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center
+                    .padding(16.dp)
             ) {
                 Text(
                     text = "Movie not found",
@@ -40,9 +98,7 @@ fun MovieDetailScreen(
                 }
             }
         } else {
-
             val rating by viewModel.rating.collectAsState()
-            val isFavorite by viewModel.isFavorite.collectAsState()
 
             LaunchedEffect(movie.id) {
                 viewModel.loadFavorite(movie.id)
@@ -75,11 +131,9 @@ fun MovieDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text("Your Rating: $rating")
-
                 Text(
-                    text = if (isFavorite) " Saved to Favorite" else "Not saved",
-                    style = MaterialTheme.typography.bodyMedium
+                    text = "Your Rating: $rating / 5",
+                    style = MaterialTheme.typography.titleMedium
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -87,8 +141,7 @@ fun MovieDetailScreen(
                 StarRating(
                     rating = rating,
                     onRatingChanged = { newRating ->
-                        viewModel.updateRating(newRating,movie)
-
+                        viewModel.updateRating(newRating, movie)
                     }
                 )
 
@@ -104,26 +157,26 @@ fun MovieDetailScreen(
 
 @Composable
 fun StarRating(
-
     rating: Int,
     onRatingChanged: (Int) -> Unit
 ) {
-    Row{
+    Row {
         for (i in 1..5) {
             Icon(
-                imageVector = if (i <= rating)
+                imageVector = if (i <= rating) {
                     Icons.Filled.Star
-                else
-                    Icons.Outlined.StarBorder,
+                } else {
+                    Icons.Outlined.StarBorder
+                },
                 contentDescription = "Star $i",
-                tint = if (i <= rating)
+                tint = if (i <= rating) {
                     MaterialTheme.colorScheme.primary
-                 else
-                     MaterialTheme.colorScheme.outline,
-
+                } else {
+                    MaterialTheme.colorScheme.outline
+                },
                 modifier = Modifier
-                    .size(36.dp)
-                    .clickable { onRatingChanged(i)}
+                    .padding(end = 4.dp)
+                    .clickable { onRatingChanged(i) }
             )
         }
     }

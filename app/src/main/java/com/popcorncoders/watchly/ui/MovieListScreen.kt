@@ -10,12 +10,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brightness4
+import androidx.compose.material.icons.filled.Brightness7
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -23,6 +28,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -41,15 +47,50 @@ import com.popcorncoders.watchly.model.Movie
 fun MovieListScreen(
     movies: List<Movie>,
     errorMessage: String? = null,
+    isDarkMode: Boolean,
+    onToggleDarkMode: () -> Unit,
     onMovieClick: (Movie) -> Unit,
-    onFavoritesClick: () -> Unit
+    onFavoriteClick: (Movie) -> Unit,
+    onFavoritesPageClick: () -> Unit,
+    onRatedMoviesPageClick: () -> Unit,
+    onSearchChanged: (String) -> Unit = {}
 ) {
     val searchText = remember { mutableStateOf("") }
+
+    val filteredMovies = if (searchText.value.isBlank()) {
+        movies
+    } else {
+        movies.filter {
+            it.title.contains(searchText.value, ignoreCase = true)
+        }
+    }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Watchly") }
+                title = { Text("Watchly") },
+                actions = {
+                    IconButton(onClick = onToggleDarkMode) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
+                            contentDescription = "Toggle dark mode"
+                        )
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rated movies"
+                        )
+                    }
+
+                    IconButton(onClick = onFavoritesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorites page"
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -61,23 +102,17 @@ fun MovieListScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
-                onClick = onFavoritesClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Go to Favorites")
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
             OutlinedTextField(
                 value = searchText.value,
                 onValueChange = {
                     searchText.value = it
+                    onSearchChanged(it)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text("Search movies") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                leadingIcon = {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                },
                 singleLine = true
             )
 
@@ -95,8 +130,8 @@ fun MovieListScreen(
                             color = MaterialTheme.colorScheme.error
                         )
                     }
-
                 }
+
                 movies.isEmpty() -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -106,15 +141,25 @@ fun MovieListScreen(
                     }
                 }
 
+                filteredMovies.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("No movies found.")
+                    }
+                }
+
                 else -> {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                         contentPadding = PaddingValues(bottom = 24.dp)
                     ) {
-                        items(movies) { movie ->
+                        items(filteredMovies) { movie ->
                             MovieItemCard(
                                 movie = movie,
-                                onClick = { onMovieClick(movie) }
+                                onClick = { onMovieClick(movie) },
+                                onFavoriteClick = { onFavoriteClick(movie) }
                             )
                         }
                     }
@@ -127,7 +172,8 @@ fun MovieListScreen(
 @Composable
 private fun MovieItemCard(
     movie: Movie,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier
@@ -143,23 +189,23 @@ private fun MovieItemCard(
             Card(
                 modifier = Modifier
                     .height(92.dp)
-                    .weight(0.28f)
+                    .weight(0.25f)
             ) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Search,
+                        imageVector = Icons.Default.Movie,
                         contentDescription = "Movie poster placeholder"
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.padding(6.dp))
+            Spacer(modifier = Modifier.width(12.dp))
 
             Column(
-                modifier = Modifier.weight(0.72f)
+                modifier = Modifier.weight(0.60f)
             ) {
                 Text(
                     text = movie.title,
@@ -174,6 +220,26 @@ private fun MovieItemCard(
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 3
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Tap movie to view description and rate it",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Column(
+                modifier = Modifier.weight(0.15f),
+                horizontalAlignment = Alignment.End
+            ) {
+                IconButton(onClick = onFavoriteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Add to favorites"
+                    )
+                }
             }
         }
     }
