@@ -22,17 +22,15 @@ class FavoriteViewModel(application: Application) : AndroidViewModel(application
     val favorites = dao.getAllFavorites()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // Add a movie to favorites.
     fun addFavorite(movie: FavoriteEntity) {
         viewModelScope.launch {
-            dao.addFavorite(movie)
+            dao.insertFavorite(movie)
         }
     }
 
-    // Remove a movie from favorites by its ID
     fun removeFavorite(movieId: Int) {
         viewModelScope.launch {
-            dao.removeFavorite(movieId)
+            dao.deleteFavorite(movieId)
         }
     }
 }

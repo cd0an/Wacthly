@@ -38,6 +38,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.popcorncoders.watchly.model.Movie
@@ -46,6 +47,7 @@ import com.popcorncoders.watchly.model.Movie
 @Composable
 fun MovieListScreen(
     movies: List<Movie>,
+    favoriteMovieIds: Set<Int>,
     errorMessage: String? = null,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
@@ -158,6 +160,7 @@ fun MovieListScreen(
                         items(filteredMovies) { movie ->
                             MovieItemCard(
                                 movie = movie,
+                                isFavorite = favoriteMovieIds.contains(movie.id),
                                 onClick = { onMovieClick(movie) },
                                 onFavoriteClick = { onFavoriteClick(movie) }
                             )
@@ -172,6 +175,7 @@ fun MovieListScreen(
 @Composable
 private fun MovieItemCard(
     movie: Movie,
+    isFavorite: Boolean,
     onClick: () -> Unit,
     onFavoriteClick: () -> Unit
 ) {
@@ -237,7 +241,8 @@ private fun MovieItemCard(
                 IconButton(onClick = onFavoriteClick) {
                     Icon(
                         imageVector = Icons.Default.Favorite,
-                        contentDescription = "Add to favorites"
+                        contentDescription = "Add to favorites",
+                        tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.outline
                     )
                 }
             }

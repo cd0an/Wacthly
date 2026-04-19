@@ -14,7 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.ui.FavoritesScreen
 import com.popcorncoders.watchly.ui.MovieDetailScreen
@@ -41,9 +40,11 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 val movies by movieListViewModel.movies.collectAsStateWithLifecycle(emptyList())
+                val favoriteMovieIds by movieListViewModel.favoriteMovieIds.collectAsStateWithLifecycle()
                 val error by movieListViewModel.error.collectAsStateWithLifecycle()
+
                 val favorites by favoriteViewModel.favorites.collectAsStateWithLifecycle(emptyList())
-                val ratedMovies by movieDetailViewModel.ratedMovies.collectAsStateWithLifecycle(emptyList())
+                val ratedMovies by favoriteViewModel.favorites.collectAsStateWithLifecycle(emptyList())
 
                 val mappedMovies = movies.map { entity ->
                     Movie(
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
                     composable("movie_list") {
                         MovieListScreen(
                             movies = mappedMovies,
+                            favoriteMovieIds = favoriteMovieIds,
                             errorMessage = error,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
@@ -68,15 +70,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("movie_detail/${movie.id}")
                             },
                             onFavoriteClick = { movie ->
-                                favoriteViewModel.addFavorite(
-                                    FavoriteEntity(
-                                        movieId = movie.id,
-                                        title = movie.title,
-                                        overview = movie.overview,
-                                        posterPath = movie.poster_path,
-                                        rating = 0
-                                    )
-                                )
+                                movieListViewModel.toggleFavorite(movie)
                             },
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")
@@ -132,7 +126,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("rated_movies") {
                         RatedMoviesScreen(
-                            ratedMovies = ratedMovies,
+                            ratedMovies = ratedMovies.filter { it.rating > 0 },
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onFavoritesPageClick = {

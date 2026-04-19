@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -99,6 +100,7 @@ fun MovieDetailScreen(
             }
         } else {
             val rating by viewModel.rating.collectAsState()
+            val isFavorite by viewModel.isFavorite.collectAsState()
 
             LaunchedEffect(movie.id) {
                 viewModel.loadFavorite(movie.id)
@@ -116,6 +118,23 @@ fun MovieDetailScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                Button(onClick = { viewModel.toggleFavorite(movie) }) {
+                    Row {
+                        Icon(
+                            imageVector = if (isFavorite) {
+                                Icons.Filled.Favorite
+                            } else {
+                                Icons.Outlined.FavoriteBorder
+                            },
+                            contentDescription = "Toggle favorite"
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                        Text(if (isFavorite) "Remove from Favorites" else "Add to Favorites")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     text = "Overview",
