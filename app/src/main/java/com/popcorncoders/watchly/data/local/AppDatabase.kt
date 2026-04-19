@@ -6,18 +6,21 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.popcorncoders.watchly.data.local.dao.FavoriteDao
 import com.popcorncoders.watchly.data.local.dao.MovieDao
+import com.popcorncoders.watchly.data.local.dao.RatingDao
 import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
 import com.popcorncoders.watchly.data.local.entity.MovieEntity
+import com.popcorncoders.watchly.data.local.entity.RatingEntity
 
 @Database(
-    entities = [MovieEntity::class, FavoriteEntity::class],
-    version = 2,
+    entities = [MovieEntity::class, FavoriteEntity::class, RatingEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun movieDao(): MovieDao
     abstract fun favoriteDao(): FavoriteDao
+    abstract fun ratingDao(): RatingDao
 
     companion object {
         @Volatile

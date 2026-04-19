@@ -3,8 +3,8 @@ package com.popcorncoders.watchly.data.local.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "favorites")
-data class FavoriteEntity(
+@Entity(tableName = "ratings")
+data class RatingEntity(
     @PrimaryKey
     val movieId: Int,
     val title: String,
@@ -13,5 +13,6 @@ data class FavoriteEntity(
     val backdropPath: String?,
     val releaseDate: String?,
     val voteAverage: Double,
-    val addedAt: Long = System.currentTimeMillis()
+    val rating: Int,
+    val ratedAt: Long = System.currentTimeMillis()
 )

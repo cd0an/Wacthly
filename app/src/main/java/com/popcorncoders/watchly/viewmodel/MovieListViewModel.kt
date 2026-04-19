@@ -22,7 +22,8 @@ class MovieListViewModel(application: Application) : AndroidViewModel(applicatio
     private val repository = MovieRepository(
         apiService = RetrofitClient.api,
         movieDao = database.movieDao(),
-        favoriteDao = database.favoriteDao()
+        favoriteDao = database.favoriteDao(),
+        ratingDao = database.ratingDao()
     )
 
     // StateFlow for the list of movies
@@ -77,7 +78,9 @@ class MovieListViewModel(application: Application) : AndroidViewModel(applicatio
                         title = movie.title,
                         overview = movie.overview,
                         posterPath = movie.poster_path,
-                        rating = 0
+                        backdropPath = movie.backdrop_path,
+                        releaseDate = movie.release_date,
+                        voteAverage = movie.vote_average
                     )
                 )
             } else {

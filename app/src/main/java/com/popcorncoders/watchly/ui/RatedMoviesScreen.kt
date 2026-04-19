@@ -27,12 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
+import com.popcorncoders.watchly.data.local.entity.RatingEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RatedMoviesScreen(
-    ratedMovies: List<FavoriteEntity>,
+    ratedMovies: List<RatingEntity>,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
     onFavoritesPageClick: () -> Unit,

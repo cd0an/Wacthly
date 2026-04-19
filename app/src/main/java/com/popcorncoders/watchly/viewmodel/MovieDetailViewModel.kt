@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.popcorncoders.watchly.data.local.AppDatabase
 import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
+import com.popcorncoders.watchly.data.local.entity.RatingEntity
 import com.popcorncoders.watchly.data.remote.RetrofitClient
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.repository.MovieRepository
@@ -19,7 +20,8 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
     private val repository = MovieRepository(
         apiService = RetrofitClient.api,
         movieDao = database.movieDao(),
-        favoriteDao = database.favoriteDao()
+        favoriteDao = database.favoriteDao(),
+        ratingDao = database.ratingDao()
     )
 
     private val _isFavorite = MutableStateFlow(false)
@@ -30,12 +32,17 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
 
     fun loadFavorite(movieId: Int) {
         viewModelScope.launch {
+            // Check favorites table
             val favorite = repository.getFavoriteByMovieId(movieId)
             _isFavorite.value = favorite != null
-            _rating.value = favorite?.rating ?: 0
+
+            // Check ratings table
+            val rating = repository.getRatingByMovieId(movieId)
+            _rating.value = rating?.rating ?: 0
         }
     }
 
+    // Favorites table
     fun toggleFavorite(movie: Movie) {
         viewModelScope.launch {
             val existing = repository.getFavoriteByMovieId(movie.id)
@@ -47,7 +54,9 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
                         title = movie.title,
                         overview = movie.overview,
                         posterPath = movie.poster_path,
-                        rating = _rating.value
+                        backdropPath = movie.backdrop_path,
+                        releaseDate = movie.release_date,
+                        voteAverage = movie.vote_average
                     )
                 )
                 _isFavorite.value = true
@@ -58,14 +67,18 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    // Ratings table
     fun updateRating(value: Int, movie: Movie) {
         viewModelScope.launch {
-            repository.upsertFavorite(
-                FavoriteEntity(
+            repository.upsertRating(
+                RatingEntity(
                     movieId = movie.id,
                     title = movie.title,
                     overview = movie.overview,
                     posterPath = movie.poster_path,
+                    backdropPath = movie.backdrop_path,
+                    releaseDate = movie.release_date,
+                    voteAverage = movie.vote_average,
                     rating = value
                 )
             )

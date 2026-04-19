@@ -14,7 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.ui.FavoritesScreen
 import com.popcorncoders.watchly.ui.MovieDetailScreen
@@ -24,12 +23,14 @@ import com.popcorncoders.watchly.ui.theme.WatchlyTheme
 import com.popcorncoders.watchly.viewmodel.FavoriteViewModel
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
 import com.popcorncoders.watchly.viewmodel.MovieListViewModel
+import com.popcorncoders.watchly.viewmodel.RatingViewModel
 
 class MainActivity : ComponentActivity() {
 
     private val movieListViewModel: MovieListViewModel by viewModels()
     private val favoriteViewModel: FavoriteViewModel by viewModels()
     private val movieDetailViewModel: MovieDetailViewModel by viewModels()
+    private val ratingViewModel: RatingViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +44,8 @@ class MainActivity : ComponentActivity() {
                 val movies by movieListViewModel.movies.collectAsStateWithLifecycle(emptyList())
                 val favoriteMovieIds by movieListViewModel.favoriteMovieIds.collectAsStateWithLifecycle()
                 val error by movieListViewModel.error.collectAsStateWithLifecycle()
-
                 val favorites by favoriteViewModel.favorites.collectAsStateWithLifecycle(emptyList())
-                val ratedMovies by favoriteViewModel.favorites.collectAsStateWithLifecycle(emptyList())
+                val ratings by ratingViewModel.ratings.collectAsStateWithLifecycle(emptyList())
 
                 val mappedMovies = movies.map { entity ->
                     Movie(
@@ -133,7 +133,7 @@ class MainActivity : ComponentActivity() {
 
                     composable("rated_movies") {
                         RatedMoviesScreen(
-                            ratedMovies = ratedMovies.filter { it.rating > 0 },
+                            ratedMovies = ratings,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onFavoritesPageClick = {
