@@ -50,7 +50,13 @@ class MainActivity : ComponentActivity() {
                         id = entity.id,
                         title = entity.title,
                         overview = entity.overview,
-                        poster_path = entity.posterPath
+                        poster_path = entity.posterPath,
+                        backdrop_path = entity.backdropPath,
+                        release_date = entity.releaseDate,
+                        vote_average = entity.voteAverage,
+                        vote_count = 0,
+                        popularity = entity.popularity,
+                        genre_ids = emptyList()
                     )
                 }
 
@@ -74,6 +80,9 @@ class MainActivity : ComponentActivity() {
                                         title = movie.title,
                                         overview = movie.overview,
                                         posterPath = movie.poster_path,
+                                        backdropPath = movie.backdrop_path,
+                                        releaseDate = movie.release_date,
+                                        voteAverage = movie.vote_average,
                                         rating = 0
                                     )
                                 )
