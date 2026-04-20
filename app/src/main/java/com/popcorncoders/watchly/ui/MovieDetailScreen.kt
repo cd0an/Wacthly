@@ -148,6 +148,27 @@ fun MovieDetailScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Release Date: ${movie.release_date ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Rating (TMDb): %.1f".format(movie.vote_average),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    text = "Popularity: %.1f".format(movie.popularity),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
@@ -166,9 +187,6 @@ fun MovieDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Button(onClick = onBackClick) {
-                    Text("Back")
-                }
             }
         }
     }

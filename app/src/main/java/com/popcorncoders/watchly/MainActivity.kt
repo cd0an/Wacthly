@@ -47,9 +47,9 @@ class MainActivity : ComponentActivity() {
         // Request notification permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED) {
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -96,8 +96,8 @@ class MainActivity : ComponentActivity() {
                             errorMessage = error,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
-                            onMovieClick = { movie ->
-                                navController.navigate("movie_detail/${movie.id}")
+                            onMovieClick = { movieId ->
+                                navController.navigate("movie_detail/${movieId}")
                             },
                             onFavoriteClick = { movie ->
                                 movieListViewModel.toggleFavorite(movie)
@@ -148,9 +148,17 @@ class MainActivity : ComponentActivity() {
                             onRemoveClick = { movieId ->
                                 favoriteViewModel.removeFavorite(movieId)
                             },
+
+                            onMovieClick = { movieId ->
+                                navController.navigate("movie_detail/$movieId")
+
+                            },
+
                             onBackClick = {
                                 navController.popBackStack()
-                            }
+                            },
+                            isLoading = false,
+                            errorMessage = null
                         )
                     }
 
@@ -161,6 +169,9 @@ class MainActivity : ComponentActivity() {
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")
+                            },
+                            onMovieClick = { movieId ->
+                                navController.navigate("movie_detail/$movieId")
                             },
                             onBackClick = {
                                 navController.popBackStack()

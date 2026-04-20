@@ -28,4 +28,3 @@ interface ApiService {
         @Query("query") query: String
     ): MovieResponse
 }
-

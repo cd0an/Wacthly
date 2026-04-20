@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
+import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,22 +61,29 @@ fun MovieListScreen(
     errorMessage: String? = null,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
-    onMovieClick: (Movie) -> Unit,
+    onMovieClick: (Int) -> Unit,
     onFavoriteClick: (Movie) -> Unit,
     onFavoritesPageClick: () -> Unit,
     onRatedMoviesPageClick: () -> Unit,
     onSearchChanged: (String) -> Unit = {}
 ) {
     val searchText = remember { mutableStateOf("") }
+
+    var sortOption by remember {mutableStateOf("None")}
+
     val listState = rememberLazyListState()
 
     val density = LocalDensity.current
 
-    val filteredMovies = if (searchText.value.isBlank()) {
-        movies
-    } else {
-        movies.filter {
+    val filteredMovies = movies
+        .filter {
             it.title.contains(searchText.value, ignoreCase = true)
+        }
+        .let {
+            when (sortOption) {
+                "Popularity" -> it.sortedByDescending { m -> m.popularity }
+                "Rating" -> it.sortedByDescending { m -> m.vote_average }
+                else -> it
         }
     }
 
@@ -150,6 +158,20 @@ fun MovieListScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Row {
+                    Button(onClick = { sortOption = "Popularity" }) {
+                        Text("Sort by Popularity")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(onClick = { sortOption = "Rating" }) {
+                        Text("Sort by Rating")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 OutlinedTextField(
                     value = searchText.value,
                     onValueChange = {
@@ -208,7 +230,7 @@ fun MovieListScreen(
                                 MovieItemCard(
                                     movie = movie,
                                     isFavorite = favoriteMovieIds.contains(movie.id),
-                                    onClick = { onMovieClick(movie) },
+                                    onClick = { onMovieClick(movie.id) },
                                     onFavoriteClick = { onFavoriteClick(movie) }
                                 )
                             }
