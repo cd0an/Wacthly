@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarBorder
@@ -39,6 +40,7 @@ fun MovieDetailScreen(
     viewModel: MovieDetailViewModel,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
+    onHomeClick: () -> Unit,
     onFavoritesPageClick: () -> Unit,
     onRatedMoviesPageClick: () -> Unit,
     onBackClick: () -> Unit
@@ -56,6 +58,13 @@ fun MovieDetailScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onHomeClick) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home"
+                        )
+                    }
+
                     IconButton(onClick = onToggleDarkMode) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
@@ -186,7 +195,6 @@ fun MovieDetailScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
             }
         }
     }

@@ -1,5 +1,8 @@
 package com.popcorncoders.watchly
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.popcorncoders.watchly.model.Movie
+import com.popcorncoders.watchly.notification.NotificationHelper
 import com.popcorncoders.watchly.ui.FavoritesScreen
 import com.popcorncoders.watchly.ui.MovieDetailScreen
 import com.popcorncoders.watchly.ui.MovieListScreen
@@ -24,12 +30,6 @@ import com.popcorncoders.watchly.viewmodel.FavoriteViewModel
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
 import com.popcorncoders.watchly.viewmodel.MovieListViewModel
 import com.popcorncoders.watchly.viewmodel.RatingViewModel
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.popcorncoders.watchly.notification.NotificationHelper
 
 class MainActivity : ComponentActivity() {
 
@@ -41,15 +41,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Create notification channel
         NotificationHelper.createNotificationChannel(this)
 
-        // Request notification permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED) {
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -85,6 +84,15 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                fun goHome() {
+                    navController.navigate("movie_list") {
+                        popUpTo("movie_list") {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
+                }
+
                 NavHost(
                     navController = navController,
                     startDestination = "movie_list"
@@ -97,7 +105,7 @@ class MainActivity : ComponentActivity() {
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onMovieClick = { movieId ->
-                                navController.navigate("movie_detail/${movieId}")
+                                navController.navigate("movie_detail/$movieId")
                             },
                             onFavoriteClick = { movie ->
                                 movieListViewModel.toggleFavorite(movie)
@@ -125,6 +133,9 @@ class MainActivity : ComponentActivity() {
                             viewModel = movieDetailViewModel,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onHomeClick = {
+                                goHome()
+                            },
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")
                             },
@@ -140,25 +151,25 @@ class MainActivity : ComponentActivity() {
                     composable("favorites") {
                         FavoritesScreen(
                             favorites = favorites,
+                            isLoading = false,
+                            errorMessage = null,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onHomeClick = {
+                                goHome()
+                            },
                             onRatedMoviesPageClick = {
                                 navController.navigate("rated_movies")
                             },
                             onRemoveClick = { movieId ->
                                 favoriteViewModel.removeFavorite(movieId)
                             },
-
                             onMovieClick = { movieId ->
                                 navController.navigate("movie_detail/$movieId")
-
                             },
-
                             onBackClick = {
                                 navController.popBackStack()
-                            },
-                            isLoading = false,
-                            errorMessage = null
+                            }
                         )
                     }
 
@@ -167,6 +178,9 @@ class MainActivity : ComponentActivity() {
                             ratedMovies = ratings,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onHomeClick = {
+                                goHome()
+                            },
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")
                             },

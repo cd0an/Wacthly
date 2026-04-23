@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.platform.LocalDensity
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoritesScreen(
@@ -30,6 +29,7 @@ fun FavoritesScreen(
     errorMessage: String?,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
+    onHomeClick: () -> Unit,
     onRatedMoviesPageClick: () -> Unit,
     onRemoveClick: (Int) -> Unit,
     onMovieClick: (Int) -> Unit,
@@ -79,6 +79,10 @@ fun FavoritesScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onHomeClick) {
+                        Icon(Icons.Default.Home, "Home")
+                    }
+
                     IconButton(onClick = onToggleDarkMode) {
                         Icon(
                             imageVector = if (isDarkMode)
@@ -157,7 +161,6 @@ fun FavoritesScreen(
                             }
                         }
                     }
-
 
                     if (totalItems > visibleItems) {
                         val thumbHeightPx = viewportHeightPx * thumbHeightRatio

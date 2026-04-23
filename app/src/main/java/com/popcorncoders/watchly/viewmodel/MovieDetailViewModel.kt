@@ -32,17 +32,14 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
 
     fun loadFavorite(movieId: Int) {
         viewModelScope.launch {
-            // Check favorites table
             val favorite = repository.getFavoriteByMovieId(movieId)
             _isFavorite.value = favorite != null
 
-            // Check ratings table
             val rating = repository.getRatingByMovieId(movieId)
             _rating.value = rating?.rating ?: 0
         }
     }
 
-    // Favorites table
     fun toggleFavorite(movie: Movie) {
         viewModelScope.launch {
             val existing = repository.getFavoriteByMovieId(movie.id)
@@ -67,7 +64,6 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
-    // Ratings table
     fun updateRating(value: Int, movie: Movie) {
         viewModelScope.launch {
             repository.upsertRating(
@@ -82,8 +78,9 @@ class MovieDetailViewModel(application: Application) : AndroidViewModel(applicat
                     rating = value
                 )
             )
+
             _rating.value = value
-            _isFavorite.value = true
+
         }
     }
 }

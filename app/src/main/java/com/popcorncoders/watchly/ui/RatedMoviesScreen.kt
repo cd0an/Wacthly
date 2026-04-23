@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.*
@@ -24,6 +25,7 @@ fun RatedMoviesScreen(
     ratedMovies: List<RatingEntity>,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
+    onHomeClick: () -> Unit,
     onFavoritesPageClick: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onBackClick: () -> Unit,
@@ -43,6 +45,13 @@ fun RatedMoviesScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onHomeClick) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home"
+                        )
+                    }
+
                     IconButton(onClick = onToggleDarkMode) {
                         Icon(
                             imageVector = if (isDarkMode)
