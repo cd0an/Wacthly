@@ -20,6 +20,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.platform.LocalDensity
+import com.popcorncoders.watchly.ui.theme.activeHomeColor
+import com.popcorncoders.watchly.ui.theme.activeRatedColor
+import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
+import com.popcorncoders.watchly.ui.theme.Screen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,6 +32,7 @@ fun FavoritesScreen(
     favorites: List<FavoriteEntity>,
     isLoading: Boolean,
     errorMessage: String?,
+    currentScreen: Screen,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
     onHomeClick: () -> Unit,
@@ -80,7 +86,40 @@ fun FavoritesScreen(
                 },
                 actions = {
                     IconButton(onClick = onHomeClick) {
-                        Icon(Icons.Default.Home, "Home")
+                        Icon(
+                            Icons.Default.Home,
+                            "Home",
+                            tint = if (currentScreen == Screen.HOME)
+                                activeHomeColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                            )
+
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            Icons.Default.Star,
+                            "Rated",
+                            tint = if (currentScreen == Screen.RATED)
+                                activeRatedColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(
+                        onClick = {},
+                        enabled = false
+                    ) {
+                        Icon(
+                            Icons.Default.Favorite,
+                            "Favorites page",
+                            tint = if (currentScreen == Screen.FAVORITES)
+                                activeFavoriteColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
                     }
 
                     IconButton(onClick = onToggleDarkMode) {
@@ -93,13 +132,6 @@ fun FavoritesScreen(
                         )
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
-                        Icon(Icons.Default.Star, "Rated")
-                    }
-
-                    IconButton(onClick = {}) {
-                        Icon(Icons.Default.Favorite, "Fav")
-                    }
                 }
             )
         }

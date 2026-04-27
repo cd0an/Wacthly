@@ -26,6 +26,7 @@ import com.popcorncoders.watchly.ui.MovieDetailScreen
 import com.popcorncoders.watchly.ui.MovieListScreen
 import com.popcorncoders.watchly.ui.RatedMoviesScreen
 import com.popcorncoders.watchly.ui.theme.WatchlyTheme
+import com.popcorncoders.watchly.ui.theme.Screen
 import com.popcorncoders.watchly.viewmodel.FavoriteViewModel
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
 import com.popcorncoders.watchly.viewmodel.MovieListViewModel
@@ -101,18 +102,27 @@ class MainActivity : ComponentActivity() {
                         MovieListScreen(
                             movies = mappedMovies,
                             favoriteMovieIds = favoriteMovieIds,
+                            currentScreen = Screen.HOME,
                             errorMessage = error,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
+
+                            onHomeClick = {
+                                navController.popBackStack("movie_list", false)
+                            },
+
                             onMovieClick = { movieId ->
                                 navController.navigate("movie_detail/$movieId")
                             },
+
                             onFavoriteClick = { movie ->
                                 movieListViewModel.toggleFavorite(movie)
                             },
+
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")
                             },
+
                             onRatedMoviesPageClick = {
                                 navController.navigate("rated_movies")
                             }
@@ -131,6 +141,7 @@ class MainActivity : ComponentActivity() {
                         MovieDetailScreen(
                             movie = selectedMovie,
                             viewModel = movieDetailViewModel,
+                            currentScreen = Screen.DETAIL,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onHomeClick = {
@@ -153,6 +164,7 @@ class MainActivity : ComponentActivity() {
                             favorites = favorites,
                             isLoading = false,
                             errorMessage = null,
+                            currentScreen = Screen.FAVORITES,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onHomeClick = {
@@ -176,10 +188,14 @@ class MainActivity : ComponentActivity() {
                     composable("rated_movies") {
                         RatedMoviesScreen(
                             ratedMovies = ratings,
+                            currentScreen = Screen.RATED,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },
                             onHomeClick = {
                                 goHome()
+                            },
+                            onRatedMoviesPageClick = {
+                                navController.navigate("rated_movies")
                             },
                             onFavoritesPageClick = {
                                 navController.navigate("favorites")

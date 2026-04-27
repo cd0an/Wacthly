@@ -8,12 +8,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Button
@@ -32,12 +32,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
+import com.popcorncoders.watchly.ui.theme.activeHomeColor
+import com.popcorncoders.watchly.ui.theme.activeRatedColor
+import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
+import com.popcorncoders.watchly.ui.theme.Screen
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(
     movie: Movie?,
     viewModel: MovieDetailViewModel,
+    currentScreen: Screen,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
     onHomeClick: () -> Unit,
@@ -52,7 +58,7 @@ fun MovieDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
                     }
@@ -61,7 +67,33 @@ fun MovieDetailScreen(
                     IconButton(onClick = onHomeClick) {
                         Icon(
                             imageVector = Icons.Default.Home,
-                            contentDescription = "Home"
+                            contentDescription = "Home",
+                            tint = if (currentScreen == Screen.HOME)
+                                activeHomeColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rated movies",
+                            tint = if (currentScreen == Screen.RATED)
+                                activeRatedColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onFavoritesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorites page",
+                            tint = if (currentScreen == Screen.FAVORITES)
+                                activeFavoriteColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -72,19 +104,6 @@ fun MovieDetailScreen(
                         )
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Rated movies"
-                        )
-                    }
-
-                    IconButton(onClick = onFavoritesPageClick) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorites page"
-                        )
-                    }
                 }
             )
         }

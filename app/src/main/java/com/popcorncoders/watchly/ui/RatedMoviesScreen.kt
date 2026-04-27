@@ -18,14 +18,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.popcorncoders.watchly.data.local.entity.RatingEntity
+import com.popcorncoders.watchly.ui.theme.activeHomeColor
+import com.popcorncoders.watchly.ui.theme.activeRatedColor
+import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
+import com.popcorncoders.watchly.ui.theme.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RatedMoviesScreen(
     ratedMovies: List<RatingEntity>,
+    currentScreen: Screen,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
     onHomeClick: () -> Unit,
+    onRatedMoviesPageClick: () -> Unit,
     onFavoritesPageClick: () -> Unit,
     onMovieClick: (Int) -> Unit,
     onBackClick: () -> Unit,
@@ -48,7 +54,33 @@ fun RatedMoviesScreen(
                     IconButton(onClick = onHomeClick) {
                         Icon(
                             imageVector = Icons.Default.Home,
-                            contentDescription = "Home"
+                            contentDescription = "Home",
+                            tint = if (currentScreen == Screen.HOME)
+                                activeHomeColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onRatedMoviesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "Rated movies",
+                            tint = if (currentScreen == Screen.RATED)
+                                activeRatedColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onFavoritesPageClick) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorites page",
+                            tint = if (currentScreen == Screen.FAVORITES)
+                                activeFavoriteColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
 
@@ -58,21 +90,8 @@ fun RatedMoviesScreen(
                                 Icons.Default.Brightness7
                             else
                                 Icons.Default.Brightness4,
-                            contentDescription = "Toggle dark mode"
-                        )
-                    }
-
-                    IconButton(onClick = {}) {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = "Rated movies"
-                        )
-                    }
-
-                    IconButton(onClick = onFavoritesPageClick) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorites page"
+                            contentDescription = "Toggle dark mode",
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }

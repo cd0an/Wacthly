@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
@@ -51,6 +52,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.animation.core.animateFloatAsState
 import com.popcorncoders.watchly.model.Movie
+import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
+import com.popcorncoders.watchly.ui.theme.activeRatedColor
+import com.popcorncoders.watchly.ui.theme.activeHomeColor
+import com.popcorncoders.watchly.ui.theme.Screen
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,6 +63,7 @@ import com.popcorncoders.watchly.model.Movie
 fun MovieListScreen(
     movies: List<Movie>,
     favoriteMovieIds: Set<Int>,
+    currentScreen: Screen,
     errorMessage: String? = null,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
@@ -65,6 +71,7 @@ fun MovieListScreen(
     onFavoriteClick: (Movie) -> Unit,
     onFavoritesPageClick: () -> Unit,
     onRatedMoviesPageClick: () -> Unit,
+    onHomeClick: () -> Unit,
     onSearchChanged: (String) -> Unit = {}
 ) {
     val searchText = remember { mutableStateOf("") }
@@ -121,24 +128,47 @@ fun MovieListScreen(
             CenterAlignedTopAppBar(
                 title = { Text("Watchly") },
                 actions = {
-                    IconButton(onClick = onToggleDarkMode) {
+
+                    IconButton(
+                        onClick = onHomeClick,
+                        enabled = currentScreen != Screen.HOME
+                    ) {
                         Icon(
-                            imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
-                            contentDescription = "Toggle dark mode"
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Home",
+                            tint = if (currentScreen == Screen.HOME)
+                                activeHomeColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     IconButton(onClick = onRatedMoviesPageClick) {
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Rated movies"
+                            contentDescription = "Rated movies",
+                            tint = if (currentScreen == Screen.RATED)
+                                activeRatedColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
                         )
                     }
 
                     IconButton(onClick = onFavoritesPageClick) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorites page"
+                            contentDescription = "Favorites page",
+                            tint = if (currentScreen == Screen.FAVORITES)
+                                activeFavoriteColor
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+
+                    IconButton(onClick = onToggleDarkMode) {
+                        Icon(
+                            imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
+                            contentDescription = "Toggle dark mode"
                         )
                     }
                 }
@@ -353,7 +383,6 @@ private fun MovieItemCard(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "Add to favorites",
-                        tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.outline
                     )
                 }
             }
