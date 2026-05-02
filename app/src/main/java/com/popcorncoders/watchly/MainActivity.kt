@@ -64,14 +64,27 @@ class MainActivity : ComponentActivity() {
         // Notify user when they leave the app
         ProcessLifecycleOwner.get().lifecycle.addObserver(
             object : DefaultLifecycleObserver {
+                override fun onStart(owner: LifecycleOwner) {
+                    // App came to foreground - reset flag
+                }
+
                 override fun onStop(owner: LifecycleOwner) {
-                    val favoriteCount = favoriteViewModel.favorites.value.size
-                    if (favoriteCount > 0) {
-                        NotificationHelper.showFavoritesReminderNotification(
-                            context = applicationContext,
-                            favoriteCount = favoriteCount
-                        )
-                    }
+                    // Add a small delay to confirm app went to background
+                    android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                            if (!ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(
+                                androidx.lifecycle.Lifecycle.State.STARTED
+                            )) {
+                                val favoriteCount = favoriteViewModel.favorites.value.size
+                                if (favoriteCount > 0) {
+                                    NotificationHelper.showFavoritesReminderNotification(
+                                        context = applicationContext,
+                                        favoriteCount = favoriteCount
+                                    )
+                                }
+                            }
+                        },
+                        500L
+                    )
                 }
             }
         )

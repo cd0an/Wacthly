@@ -86,12 +86,6 @@ class MovieListViewModel(application: Application) : AndroidViewModel(applicatio
                         voteAverage = movie.vote_average
                     )
                 )
-                // Shows notification
-                val count = repository.getFavorites().first().size
-                NotificationHelper.showFavoritesReminderNotification(
-                    context = getApplication(),
-                    favoriteCount = count
-                )
             } else {
                 repository.deleteFavorite(movie.id)
             }
