@@ -45,6 +45,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Check if opened from notification
+        val navigateTo = intent.getStringExtra("navigate_to")
+
         NotificationHelper.createNotificationChannel(this)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -125,9 +128,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                val startDestination = if (navigateTo == "favorites") {
+                    "favorites"
+                } else {
+                    "movie_list"
+                }
+
                 NavHost(
                     navController = navController,
-                    startDestination = "movie_list"
+                    startDestination = startDestination
                 ) {
                     composable("movie_list") {
                         MovieListScreen(
