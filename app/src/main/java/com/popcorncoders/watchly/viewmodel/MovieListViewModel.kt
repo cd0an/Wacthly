@@ -57,15 +57,6 @@ class MovieListViewModel(application: Application) : AndroidViewModel(applicatio
             repository.getMoviesFromDb().collectLatest { cachedMovies ->
                 _movies.value = cachedMovies
                 Log.d("MovieListViewModel", "Movies from DB: ${cachedMovies.size}")
-
-                // Show notification once movies are loaded
-                if (cachedMovies.isNotEmpty() && !notificationShown) {
-                    notificationShown = true
-                    NotificationHelper.showNewMoviesNotification(
-                        context = getApplication(),
-                        movieCount = cachedMovies.size
-                    )
-                }
             }
         }
     }
