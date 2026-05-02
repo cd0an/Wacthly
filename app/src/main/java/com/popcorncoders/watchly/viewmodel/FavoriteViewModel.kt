@@ -4,10 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel   // ViewModel that has access to the Application context
 import androidx.lifecycle.viewModelScope     // Scope for running coroutines tied to ViewModel
 import com.popcorncoders.watchly.data.local.AppDatabase
-import com.popcorncoders.watchly.data.local.entity.FavoriteEntity
-import com.popcorncoders.watchly.notification.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 

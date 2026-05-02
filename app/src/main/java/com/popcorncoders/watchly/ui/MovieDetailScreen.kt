@@ -50,7 +50,6 @@ import com.popcorncoders.watchly.ui.theme.activeRatedColor
 import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
 import com.popcorncoders.watchly.ui.theme.Screen
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MovieDetailScreen(

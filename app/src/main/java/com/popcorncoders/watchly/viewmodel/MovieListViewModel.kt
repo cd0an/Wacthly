@@ -10,12 +10,10 @@ import com.popcorncoders.watchly.data.local.entity.MovieEntity
 import com.popcorncoders.watchly.data.remote.RetrofitClient
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.repository.MovieRepository
-import com.popcorncoders.watchly.notification.NotificationHelper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.first
 
 class MovieListViewModel(application: Application) : AndroidViewModel(application) {
 
