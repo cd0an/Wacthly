@@ -20,6 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.popcorncoders.watchly.R
 import com.popcorncoders.watchly.ui.theme.activeHomeColor
 import com.popcorncoders.watchly.ui.theme.activeRatedColor
 import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
@@ -78,17 +84,26 @@ fun FavoritesScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Favorites") },
+                title = {
+                    Text(
+                        "Favorites",
+                        fontWeight = FontWeight.Bold
+                    ) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
-                    IconButton(onClick = onHomeClick) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        enabled = currentScreen != Screen.HOME,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             Icons.Default.Home,
                             "Home",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.HOME)
                                 activeHomeColor
                             else
@@ -97,10 +112,14 @@ fun FavoritesScreen(
 
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
+                    IconButton(
+                        onClick = onRatedMoviesPageClick,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             Icons.Default.Star,
                             "Rated",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.RATED)
                                 activeRatedColor
                             else
@@ -110,11 +129,13 @@ fun FavoritesScreen(
 
                     IconButton(
                         onClick = {},
-                        enabled = false
+                        enabled = false,
+                        modifier = Modifier.size(30.dp),
                     ) {
                         Icon(
                             Icons.Default.Favorite,
                             "Favorites page",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.FAVORITES)
                                 activeFavoriteColor
                             else
@@ -122,13 +143,17 @@ fun FavoritesScreen(
                         )
                     }
 
-                    IconButton(onClick = onToggleDarkMode) {
+                    IconButton(
+                        onClick = onToggleDarkMode,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = if (isDarkMode)
                                 Icons.Default.Brightness7
                             else
                                 Icons.Default.Brightness4,
-                            contentDescription = "Theme"
+                            contentDescription = "Theme",
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
@@ -177,17 +202,62 @@ fun FavoritesScreen(
                                     .clickable { onMovieClick(movie.movieId) }
                             ) {
                                 Column(modifier = Modifier.padding(12.dp)) {
-                                    Text(
-                                        movie.title,
-                                        style = MaterialTheme.typography.titleMedium
-                                    )
 
                                     Spacer(modifier = Modifier.height(8.dp))
 
-                                    Button(
-                                        onClick = { onRemoveClick(movie.movieId) }
+                                    // Tap to view more + X button to remove
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(12.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text("Remove")
+
+                                        // Movie Poster
+                                        AsyncImage(
+                                            model = "https://image.tmdb.org/t/p/w500${movie.posterPath ?: ""}",
+                                            contentDescription = "Poster for ${movie.title}",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .height(80.dp)
+                                                .width(56.dp)
+                                                .clip(MaterialTheme.shapes.medium),
+                                            error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                            placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
+                                        )
+
+                                        Spacer(modifier = Modifier.width(12.dp))
+
+                                        // Title + tap to view more
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            // Title
+                                            Text(
+                                                movie.title,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+
+                                            // Tap to view more
+                                            Text(
+                                                text = "Tap to view more",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+
+                                        // X button
+                                        IconButton(
+                                            onClick = { onRemoveClick(movie.movieId) },
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Remove favorite",
+                                                tint = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
                                     }
                                 }
                             }

@@ -188,6 +188,7 @@ class MainActivity : ComponentActivity() {
                     composable("rated_movies") {
                         RatedMoviesScreen(
                             ratedMovies = ratings,
+                            onRemoveRating = { movieId -> ratingViewModel.removeRating(movieId) },
                             currentScreen = Screen.RATED,
                             isDarkMode = isDarkMode,
                             onToggleDarkMode = { isDarkMode = !isDarkMode },

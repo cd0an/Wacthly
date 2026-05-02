@@ -22,12 +22,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brightness4
 import androidx.compose.material.icons.filled.Brightness7
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.Card
-import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,12 +49,17 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.layout.size
+import coil.compose.AsyncImage
+import com.popcorncoders.watchly.R
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.ui.theme.activeFavoriteColor
 import com.popcorncoders.watchly.ui.theme.activeRatedColor
 import com.popcorncoders.watchly.ui.theme.activeHomeColor
 import com.popcorncoders.watchly.ui.theme.Screen
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,11 +78,8 @@ fun MovieListScreen(
     onSearchChanged: (String) -> Unit = {}
 ) {
     val searchText = remember { mutableStateOf("") }
-
     var sortOption by remember {mutableStateOf("None")}
-
     val listState = rememberLazyListState()
-
     val density = LocalDensity.current
 
     val filteredMovies = movies
@@ -126,16 +126,22 @@ fun MovieListScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Watchly") },
+                title = {
+                    Text(
+                        "Watchly",
+                        fontWeight = FontWeight.Bold
+                    ) },
                 actions = {
 
                     IconButton(
                         onClick = onHomeClick,
-                        enabled = currentScreen != Screen.HOME
+                        enabled = currentScreen != Screen.HOME,
+                        modifier = Modifier.size(30.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Home",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.HOME)
                                 activeHomeColor
                             else
@@ -143,10 +149,14 @@ fun MovieListScreen(
                         )
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
+                    IconButton(
+                        onClick = onRatedMoviesPageClick,
+                        modifier = Modifier.size(30.dp),
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rated movies",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.RATED)
                                 activeRatedColor
                             else
@@ -154,10 +164,14 @@ fun MovieListScreen(
                         )
                     }
 
-                    IconButton(onClick = onFavoritesPageClick) {
+                    IconButton(
+                        onClick = onFavoritesPageClick,
+                        modifier = Modifier.size(30.dp),
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Favorites page",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.FAVORITES)
                                 activeFavoriteColor
                             else
@@ -165,10 +179,14 @@ fun MovieListScreen(
                         )
                     }
 
-                    IconButton(onClick = onToggleDarkMode) {
+                    IconButton(
+                        onClick = onToggleDarkMode,
+                        modifier = Modifier.size(30.dp),
+                    ) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
-                            contentDescription = "Toggle dark mode"
+                            contentDescription = "Toggle dark mode",
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -188,20 +206,7 @@ fun MovieListScreen(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row {
-                    Button(onClick = { sortOption = "Popularity" }) {
-                        Text("Sort by Popularity")
-                    }
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
-                    Button(onClick = { sortOption = "Rating" }) {
-                        Text("Sort by Rating")
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+                // Search bar
                 OutlinedTextField(
                     value = searchText.value,
                     onValueChange = {
@@ -216,7 +221,37 @@ fun MovieListScreen(
                     singleLine = true
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Sort buttons
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = sortOption == "Popularity",
+                        onClick = {
+                            sortOption = if (sortOption == "Popularity") {
+                                "None"
+                            } else {
+                                "Popularity"
+                            }
+                        },
+                        label = {Text("Popularity")}
+                    )
+                    FilterChip(
+                        selected = sortOption == "Rating",
+                        onClick = {
+                            sortOption = if (sortOption == "Rating") {
+                                "None"
+                            } else {
+                                "Rating"
+                            }
+                        },
+                        label = {Text("TMDb Rating")}
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 when {
                     errorMessage != null -> {
@@ -331,21 +366,18 @@ private fun MovieItemCard(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Card(
+            // To load the movie posters
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                contentDescription = "Movie poster for ${movie.title}",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .height(92.dp)
                     .weight(0.25f)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Movie,
-                        contentDescription = "Movie poster placeholder"
-                    )
-                }
-            }
+                    .clip(MaterialTheme.shapes.medium),
+                error = painterResource(id = R.drawable.ic_launcher_foreground),
+                placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -383,6 +415,11 @@ private fun MovieItemCard(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "Add to favorites",
+                        tint = if (isFavorite) {
+                            activeFavoriteColor
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
                     )
                 }
             }

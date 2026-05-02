@@ -13,7 +13,7 @@ object RetrofitClient {
     // Interceptor auto attaches the API key to every outgoing request
     private val interceptor = Interceptor { chain ->
         val original = chain.request()
-        val url = original.url().newBuilder()
+        val url = original.url.newBuilder()
             .addQueryParameter("api_key", API_KEY) // Adds api_key to every request
             .build()
         chain.proceed(original.newBuilder().url(url).build()) // Sends the modified request

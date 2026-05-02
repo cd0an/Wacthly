@@ -16,7 +16,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
+import com.popcorncoders.watchly.R
 import com.popcorncoders.watchly.data.local.entity.RatingEntity
 import com.popcorncoders.watchly.ui.theme.activeHomeColor
 import com.popcorncoders.watchly.ui.theme.activeRatedColor
@@ -34,6 +41,7 @@ fun RatedMoviesScreen(
     onRatedMoviesPageClick: () -> Unit,
     onFavoritesPageClick: () -> Unit,
     onMovieClick: (Int) -> Unit,
+    onRemoveRating : (Int) -> Unit,
     onBackClick: () -> Unit,
     isLoading: Boolean = false,
     errorMessage: String? = null
@@ -41,7 +49,11 @@ fun RatedMoviesScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Rated Movies") },
+                title = {
+                    Text(
+                        "Ratings",
+                        fontWeight = FontWeight.Bold
+                    ) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -51,10 +63,15 @@ fun RatedMoviesScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onHomeClick) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        enabled = currentScreen != Screen.HOME,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Home",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.HOME)
                                 activeHomeColor
                             else
@@ -62,10 +79,14 @@ fun RatedMoviesScreen(
                         )
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
+                    IconButton(
+                        onClick = onRatedMoviesPageClick,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rated movies",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.RATED)
                                 activeRatedColor
                             else
@@ -73,10 +94,14 @@ fun RatedMoviesScreen(
                         )
                     }
 
-                    IconButton(onClick = onFavoritesPageClick) {
+                    IconButton(
+                        onClick = onFavoritesPageClick,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Favorites page",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.FAVORITES)
                                 activeFavoriteColor
                             else
@@ -84,14 +109,18 @@ fun RatedMoviesScreen(
                         )
                     }
 
-                    IconButton(onClick = onToggleDarkMode) {
+                    IconButton(
+                        onClick = onToggleDarkMode,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = if (isDarkMode)
                                 Icons.Default.Brightness7
                             else
                                 Icons.Default.Brightness4,
                             contentDescription = "Toggle dark mode",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
@@ -137,37 +166,86 @@ fun RatedMoviesScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(bottom = 12.dp)
+                                    .clickable { onMovieClick(movie.movieId)}
                             ) {
-                                Column(
+                                Row(
                                     modifier = Modifier
-                                        .clickable { onMovieClick(movie.movieId) }
-                                        .padding(12.dp)
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(
-                                        text = movie.title,
-                                        style = MaterialTheme.typography.titleMedium
+                                    // Movie Poster
+                                    AsyncImage(
+                                        model = "https://image.tmdb.org/t/p/w500${movie.posterPath ?: ""}",
+                                        contentDescription = "Poster for ${movie.title}",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier
+                                            .height(80.dp)
+                                            .width(56.dp)
+                                            .clip(MaterialTheme.shapes.medium),
+                                        error = painterResource(id = R.drawable.ic_launcher_foreground),
+                                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
                                     )
 
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.width(12.dp))
 
-                                    Row {
-                                        repeat(5) { i ->
-                                            Icon(
-                                                imageVector =
-                                                    if (i < movie.rating)
-                                                        Icons.Filled.Star
-                                                    else
+                                    // Title + starts + rating
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        // Movie title
+                                            Text(
+                                                text = movie.title,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+
+                                        Spacer(modifier = Modifier.height(4.dp))
+
+                                        // Gold stars
+                                        Row {
+                                            repeat(5) { i ->
+                                                Icon(
+                                                    imageVector = if (i < movie.rating) Icons.Filled.Star else
                                                         Icons.Outlined.StarBorder,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.primary,
-                                                modifier = Modifier.padding(end = 2.dp)
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.primary,
+                                                        modifier = Modifier
+                                                            .size(16.dp)
+                                                            .padding(end = 2.dp)
+                                                    )
+                                                }
+                                            }
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+
+                                            // Number rating
+                                            Text(
+                                                "Rating: ${movie.rating}/5",
+                                                style = MaterialTheme.typography.bodyMedium
+                                            )
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+
+                                            // Tap to view more
+                                            Text(
+                                                text = "Tap to view more",
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
-                                    }
 
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    Text("Rating: ${movie.rating}/5")
+                                        // X button
+                                        IconButton(
+                                            onClick = { onRemoveRating(movie.movieId)},
+                                            modifier = Modifier.size(24.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Remove rating",
+                                                tint = MaterialTheme.colorScheme.error,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                        }
                                 }
                             }
                         }

@@ -30,6 +30,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.text.font.FontWeight
+import coil.compose.AsyncImage
+import com.popcorncoders.watchly.R
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.viewmodel.MovieDetailViewModel
 import com.popcorncoders.watchly.ui.theme.activeHomeColor
@@ -54,7 +67,11 @@ fun MovieDetailScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(movie?.title ?: "Movie Details") },
+                title = {
+                    Text(
+                        "Movie Detail",
+                        fontWeight = FontWeight.Bold
+                    ) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
@@ -64,10 +81,15 @@ fun MovieDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onHomeClick) {
+                    IconButton(
+                        onClick = onHomeClick,
+                        enabled = currentScreen != Screen.HOME,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Home,
                             contentDescription = "Home",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.HOME)
                                 activeHomeColor
                             else
@@ -75,10 +97,14 @@ fun MovieDetailScreen(
                         )
                     }
 
-                    IconButton(onClick = onRatedMoviesPageClick) {
+                    IconButton(
+                        onClick = onRatedMoviesPageClick,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = "Rated movies",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.RATED)
                                 activeRatedColor
                             else
@@ -86,10 +112,14 @@ fun MovieDetailScreen(
                         )
                     }
 
-                    IconButton(onClick = onFavoritesPageClick) {
+                    IconButton(
+                        onClick = onFavoritesPageClick,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = "Favorites page",
+                            modifier = Modifier.size(22.dp),
                             tint = if (currentScreen == Screen.FAVORITES)
                                 activeFavoriteColor
                             else
@@ -97,10 +127,14 @@ fun MovieDetailScreen(
                         )
                     }
 
-                    IconButton(onClick = onToggleDarkMode) {
+                    IconButton(
+                        onClick = onToggleDarkMode,
+                        modifier = Modifier.size(30.dp)
+                    ) {
                         Icon(
                             imageVector = if (isDarkMode) Icons.Default.Brightness7 else Icons.Default.Brightness4,
-                            contentDescription = "Toggle dark mode"
+                            contentDescription = "Toggle dark mode",
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
@@ -147,20 +181,18 @@ fun MovieDetailScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(onClick = { viewModel.toggleFavorite(movie) }) {
-                    Row {
-                        Icon(
-                            imageVector = if (isFavorite) {
-                                Icons.Filled.Favorite
-                            } else {
-                                Icons.Outlined.FavoriteBorder
-                            },
-                            contentDescription = "Toggle favorite"
-                        )
-                        Spacer(modifier = Modifier.padding(horizontal = 4.dp))
-                        Text(if (isFavorite) "Remove from Favorites" else "Add to Favorites")
-                    }
-                }
+                // Load the movie posters
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w500${movie.poster_path}",
+                    contentDescription = "Movie poster for ${movie.title}",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                        .clip(MaterialTheme.shapes.medium),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -199,21 +231,44 @@ fun MovieDetailScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(
-                    text = "Your Rating: $rating / 5",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                StarRating(
-                    rating = rating,
-                    onRatingChanged = { newRating ->
-                        viewModel.updateRating(newRating, movie)
+                // Favorite button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = { viewModel.toggleFavorite(movie)}
+                    ) {
+                        Icon(
+                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Toggle favorite",
+                            tint = if (isFavorite) activeFavoriteColor else MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(if (isFavorite) "Favorited" else "Favorite")
                     }
-                )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.width(32.dp))
+
+                    // Star rating
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Your Rating: $rating / 5",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+
+                        Spacer(modifier = Modifier.height(4.dp))
+                        StarRating(
+                            rating = rating,
+                            onRatingChanged = { newRating ->
+                                viewModel.updateRating(newRating, movie)
+                            }
+                        )
+                    }
+                }
             }
         }
     }
@@ -234,7 +289,7 @@ fun StarRating(
                 },
                 contentDescription = "Star $i",
                 tint = if (i <= rating) {
-                    MaterialTheme.colorScheme.primary
+                    Color(0xFFFFD700)
                 } else {
                     MaterialTheme.colorScheme.outline
                 },
