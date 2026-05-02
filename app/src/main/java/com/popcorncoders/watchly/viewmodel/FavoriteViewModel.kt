@@ -24,19 +24,6 @@ class FavoriteViewModel(application: Application) : AndroidViewModel(application
     val favorites = dao.getAllFavorites()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun addFavorite(movie: FavoriteEntity) {
-        viewModelScope.launch {
-            dao.insertFavorite(movie)
-
-            // Get updated count and show notification
-            val count = dao.getAllFavorites().first().size
-            NotificationHelper.showFavoritesReminderNotification(
-                context = getApplication(),
-                favoriteCount = count
-            )
-        }
-    }
-
     fun removeFavorite(movieId: Int) {
         viewModelScope.launch {
             dao.deleteFavorite(movieId)

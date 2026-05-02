@@ -19,6 +19,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.notification.NotificationHelper
 import com.popcorncoders.watchly.ui.FavoritesScreen
@@ -57,6 +60,21 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
+        // Notify user when they leave the app
+        ProcessLifecycleOwner.get().lifecycle.addObserver(
+            object : DefaultLifecycleObserver {
+                override fun onStop(owner: LifecycleOwner) {
+                    val favoriteCount = favoriteViewModel.favorites.value.size
+                    if (favoriteCount > 0) {
+                        NotificationHelper.showFavoritesReminderNotification(
+                            context = applicationContext,
+                            favoriteCount = favoriteCount
+                        )
+                    }
+                }
+            }
+        )
 
         setContent {
             var isDarkMode by rememberSaveable { mutableStateOf(false) }

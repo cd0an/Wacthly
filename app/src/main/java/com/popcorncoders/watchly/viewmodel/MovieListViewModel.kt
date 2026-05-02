@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 
 class MovieListViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -84,6 +85,12 @@ class MovieListViewModel(application: Application) : AndroidViewModel(applicatio
                         releaseDate = movie.release_date,
                         voteAverage = movie.vote_average
                     )
+                )
+                // Shows notification
+                val count = repository.getFavorites().first().size
+                NotificationHelper.showFavoritesReminderNotification(
+                    context = getApplication(),
+                    favoriteCount = count
                 )
             } else {
                 repository.deleteFavorite(movie.id)
