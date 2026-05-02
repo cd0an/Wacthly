@@ -22,6 +22,7 @@ import androidx.navigation.navArgument
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import android.content.Context
 import com.popcorncoders.watchly.model.Movie
 import com.popcorncoders.watchly.notification.NotificationHelper
 import com.popcorncoders.watchly.ui.FavoritesScreen
@@ -41,6 +42,17 @@ class MainActivity : ComponentActivity() {
     private val favoriteViewModel: FavoriteViewModel by viewModels()
     private val movieDetailViewModel: MovieDetailViewModel by viewModels()
     private val ratingViewModel: RatingViewModel by viewModels()
+
+    // Dark mode persistence
+    private fun getDarkModePreference() : Boolean {
+        val prefs = getSharedPreferences("watchly_prefs", Context.MODE_PRIVATE)
+        return prefs.getBoolean("dark_mode", false)
+    }
+
+    private fun saveDarkModePreference(isDarkMode: Boolean) {
+        val prefs = getSharedPreferences("watchly_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("dark_mode", isDarkMode).apply()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +105,7 @@ class MainActivity : ComponentActivity() {
         )
 
         setContent {
-            var isDarkMode by rememberSaveable { mutableStateOf(false) }
+            var isDarkMode by rememberSaveable { mutableStateOf(getDarkModePreference()) }
 
             WatchlyTheme(darkTheme = isDarkMode) {
                 val navController = rememberNavController()
@@ -145,7 +157,9 @@ class MainActivity : ComponentActivity() {
                             currentScreen = Screen.HOME,
                             errorMessage = error,
                             isDarkMode = isDarkMode,
-                            onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onToggleDarkMode = {
+                                isDarkMode = !isDarkMode
+                                saveDarkModePreference(isDarkMode) },
 
                             onHomeClick = {
                                 navController.popBackStack("movie_list", false)
@@ -183,7 +197,9 @@ class MainActivity : ComponentActivity() {
                             viewModel = movieDetailViewModel,
                             currentScreen = Screen.DETAIL,
                             isDarkMode = isDarkMode,
-                            onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onToggleDarkMode = {
+                                isDarkMode = !isDarkMode
+                                saveDarkModePreference(isDarkMode)},
                             onHomeClick = {
                                 goHome()
                             },
@@ -206,7 +222,9 @@ class MainActivity : ComponentActivity() {
                             errorMessage = null,
                             currentScreen = Screen.FAVORITES,
                             isDarkMode = isDarkMode,
-                            onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onToggleDarkMode = {
+                                isDarkMode = !isDarkMode
+                                saveDarkModePreference(isDarkMode)},
                             onHomeClick = {
                                 goHome()
                             },
@@ -231,7 +249,9 @@ class MainActivity : ComponentActivity() {
                             onRemoveRating = { movieId -> ratingViewModel.removeRating(movieId) },
                             currentScreen = Screen.RATED,
                             isDarkMode = isDarkMode,
-                            onToggleDarkMode = { isDarkMode = !isDarkMode },
+                            onToggleDarkMode = {
+                                isDarkMode = !isDarkMode
+                                saveDarkModePreference(isDarkMode)},
                             onHomeClick = {
                                 goHome()
                             },
