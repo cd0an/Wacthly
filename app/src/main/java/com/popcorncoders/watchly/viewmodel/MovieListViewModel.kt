@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 class MovieListViewModel(application: Application) : AndroidViewModel(application) {
 
     private val database = AppDatabase.getDatabase(application)
-    private var notificationShown = false
 
     private val repository = MovieRepository(
         apiService = RetrofitClient.api,
